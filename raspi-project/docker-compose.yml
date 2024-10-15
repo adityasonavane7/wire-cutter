@@ -1,0 +1,30 @@
+version: '3'
+services:
+  kafka:
+    image: confluentinc/cp-kafka:latest
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://localhost:9092
+    depends_on:
+      - zookeeper
+
+  zookeeper:
+    image: confluentinc/cp-zookeeper:latest
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+
+  stepper_motor_service:
+    build: ./src/motor-controller
+    container_name: stepper_motor_service
+    privileged: true
+    devices:
+      - "/dev/gpiomem:/dev/gpiomem"
+    environment:
+      - STEP_PIN=17
+      - DIR_PIN=27
+      - ENABLE_PIN=22
+      - KAFKA_BOOTSTRAP_SERVERS=kafka:9092
+    depends_on:
+      - kafka
+    restart: unless-stopped
