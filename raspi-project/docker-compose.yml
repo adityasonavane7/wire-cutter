@@ -1,6 +1,7 @@
 version: '3'
 services:
   kafka:
+    mem_limit: 2g 
     image: confluentinc/cp-kafka:latest
     environment:
       KAFKA_BROKER_ID: 1
