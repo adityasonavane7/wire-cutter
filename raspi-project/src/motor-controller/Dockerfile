@@ -9,7 +9,7 @@ RUN apt-get update && apt-get install -y \
     gcc \
     && apt-get clean
 
-RUN pip3 install RPi.GPIO confluent-kafka
+RUN pip3 install zmq
 
 COPY ./src/stepper_service.py /usr/src/app/stepper_service.py
 
