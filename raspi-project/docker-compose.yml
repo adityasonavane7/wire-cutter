@@ -1,20 +1,5 @@
 version: '3'
 services:
-  kafka:
-    mem_limit: 2g 
-    image: confluentinc/cp-kafka:latest
-    environment:
-      KAFKA_BROKER_ID: 1
-      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
-      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://localhost:9092
-    depends_on:
-      - zookeeper
-
-  zookeeper:
-    image: confluentinc/cp-zookeeper:latest
-    environment:
-      ZOOKEEPER_CLIENT_PORT: 2181
-
   stepper_motor_service:
     build: ./src/motor-controller
     container_name: stepper_motor_service

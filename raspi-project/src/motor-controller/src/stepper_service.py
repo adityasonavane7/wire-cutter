@@ -1,6 +1,6 @@
+import zmq
 import RPi.GPIO as GPIO
 import time
-from confluent_kafka import Consumer, KafkaError
 
 class StepperMotorController:
     def __init__(self, step_pin, dir_pin, enable_pin=None):
@@ -11,71 +11,53 @@ class StepperMotorController:
         GPIO.setmode(GPIO.BCM)
         GPIO.setup(self.step_pin, GPIO.OUT)
         GPIO.setup(self.dir_pin, GPIO.OUT)
+
         if self.enable_pin is not None:
             GPIO.setup(self.enable_pin, GPIO.OUT)
-            GPIO.output(self.enable_pin, GPIO.LOW)  # Enable the motor
+            GPIO.output(self.enable_pin, GPIO.HIGH)  # Enable the motor driver
 
     def set_direction(self, direction):
-        if direction == '+':
-            GPIO.output(self.dir_pin, GPIO.HIGH)  # Clockwise
-        else:
-            GPIO.output(self.dir_pin, GPIO.LOW)   # Counterclockwise
+        GPIO.output(self.dir_pin, GPIO.HIGH if direction == '+' else GPIO.LOW)
 
-    def send_pulse(self, num_pulses):
-        for _ in range(abs(num_pulses)):
+    def send_pulse(self, steps):
+        for _ in range(steps):
             GPIO.output(self.step_pin, GPIO.HIGH)
-            time.sleep(0.001)
+            time.sleep(0.001)  # Adjust for speed
             GPIO.output(self.step_pin, GPIO.LOW)
             time.sleep(0.001)
 
-    def move_motor(self, direction, num_pulses):
+    def move_motor(self, direction, steps):
         self.set_direction(direction)
-        self.send_pulse(num_pulses)
+        self.send_pulse(steps)
 
     def cleanup(self):
         GPIO.cleanup()
 
-def kafka_consumer(motor):
-    # Configure Kafka consumer
-    consumer = Consumer({
-        'bootstrap.servers': 'localhost:9092',
-        'group.id': 'stepper-group',
-        'auto.offset.reset': 'earliest'
-    })
-    
-    consumer.subscribe(['stepper-motor-commands'])
+def main():
+    # Create a ZeroMQ context
+    context = zmq.Context()
+    socket = context.socket(zmq.REP)  # REP socket for replies
+    socket.bind("tcp://*:5555")  # Bind to port 5555
 
-    try:
-        while True:
-            msg = consumer.poll(1.0)  # Poll for messages
+    motor = StepperMotorController(step_pin=18, dir_pin=17)  # Use GPIO pin numbers
 
-            if msg is None:
-                continue
-            if msg.error():
-                if msg.error().code() == KafkaError._PARTITION_EOF:
-                    continue
-                else:
-                    print(f"Kafka error: {msg.error()}")
-                    break
+    print("Waiting for commands...")
+    while True:
+        message = socket.recv_string()  # Receive a command
+        print(f"Received command: {message}")
 
-            # Process the message
-            command = msg.value().decode('utf-8')
-            print(f"Received command: {command}")
-            direction = command[0]
-            num_pulses = int(command[1:])
-            motor.move_motor(direction, num_pulses)
-
-    except KeyboardInterrupt:
-        pass
-    finally:
-        consumer.close()
+        if message.startswith('+') or message.startswith('-'):
+            direction = message[0]
+            steps = abs(int(message[1:]))  # Get the absolute value of steps
+            motor.move_motor(direction, steps)
+            socket.send_string(f"Moved {direction} {steps} steps")  # Reply back
+        else:
+            socket.send_string("Invalid command")
 
 if __name__ == "__main__":
-    motor = StepperMotorController(step_pin=17, dir_pin=27, enable_pin=22)
-
     try:
-        kafka_consumer(motor)
+        main()
     except KeyboardInterrupt:
-        pass
+        print("Exiting...")
     finally:
         motor.cleanup()
