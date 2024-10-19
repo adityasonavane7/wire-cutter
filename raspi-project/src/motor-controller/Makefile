@@ -11,7 +11,7 @@ build:
 
 # Run the Docker container
 run:
-	docker run --name $(CONTAINER_NAME) -it --privileged \
+	docker run --name $(CONTAINER_NAME) --network host -it --privileged \
 		--device /dev/gpiomem \
 		-v /sys/class/gpio:/sys/class/gpio \
 		$(IMAGE_NAME)
