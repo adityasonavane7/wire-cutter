@@ -10,7 +10,4 @@ services:
       - STEP_PIN=17
       - DIR_PIN=27
       - ENABLE_PIN=22
-      - KAFKA_BOOTSTRAP_SERVERS=kafka:9092
-    depends_on:
-      - kafka
     restart: unless-stopped
