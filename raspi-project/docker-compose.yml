@@ -7,9 +7,9 @@ services:
     devices:
       - "/dev/gpiomem:/dev/gpiomem"
     environment:
-      - STEP_PIN=17
-      - DIR_PIN=27
-      - ENABLE_PIN=22
+      - STEP_PIN=22
+      - DIR_PIN=17
+      - ENABLE_PIN=27
     restart: unless-stopped
     volumes:
       - ./src/motor-controller/src/stepper_service.py:/usr/src/app/stepper_service.py
