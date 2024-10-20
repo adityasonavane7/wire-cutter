@@ -11,3 +11,5 @@ services:
       - DIR_PIN=27
       - ENABLE_PIN=22
     restart: unless-stopped
+    ports:
+    - "5555:5555"  # M

@@ -39,7 +39,7 @@ def main():
     socket = context.socket(zmq.REP)  # REP socket for replies
     socket.bind("tcp://*:5555")  # Bind to port 5555
 
-    motor = StepperMotorController(step_pin=18, dir_pin=17)  # Use GPIO pin numbers
+    motor = StepperMotorController(step_pin=17, dir_pin=27, enable_pin=27)  # Use GPIO pin numbers
 
     print("Waiting for commands...")
     while True:
