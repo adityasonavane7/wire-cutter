@@ -22,9 +22,9 @@ class StepperMotorController:
     def send_pulse(self, steps):
         for _ in range(steps):
             GPIO.output(self.step_pin, GPIO.HIGH)
-            time.sleep(1)  # Adjust for speed
+            time.sleep(0.01)  # Adjust for speed
             GPIO.output(self.step_pin, GPIO.LOW)
-            time.sleep(1)
+            time.sleep(0.1)
 
     def move_motor(self, direction, steps):
         self.set_direction(direction)
