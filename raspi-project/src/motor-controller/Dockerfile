@@ -1,4 +1,4 @@
-FROM python:3.9-buster
+FROM python:3.9-bullseye 
 
 # Update the package list and install required packages
 RUN apt-get install -y \
