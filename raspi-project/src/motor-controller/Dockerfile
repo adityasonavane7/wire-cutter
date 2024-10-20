@@ -9,7 +9,7 @@ RUN apt-get install -y \
 
 RUN pip3 install zmq RPi.GPIO
 
-COPY ./src/stepper_service.py /usr/src/app/stepper_service.py
+# COPY ./src/stepper_service.py /usr/src/app/stepper_service.py
 
 WORKDIR /usr/src/app
 
