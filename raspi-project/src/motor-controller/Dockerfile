@@ -13,4 +13,6 @@ COPY ./src/stepper_service.py /usr/src/app/stepper_service.py
 
 WORKDIR /usr/src/app
 
+EXPOSE 5555
+
 CMD ["python", "stepper_service.py"]
